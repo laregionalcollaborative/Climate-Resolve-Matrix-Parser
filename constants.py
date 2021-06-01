@@ -25,7 +25,7 @@ CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
     "Municipality has a standalone climate, sustainability, and/or resilience plan?": "city_has_cap_sust_lhmp",
     "Plan that includes climate action (mitigation)? ": "cap_status", # extra space is intentional
     "Plan that includes climate adaptation?": "climate_adapt_ack_in_plan",
-    "Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?": "lhmp_status",
+    "Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?": "lhmp_status_cr",
     "Updated General Plan per SB 379 & SB1035?": "sb379_sb1035_addressed_general_plan",
     "SB379 integration -- by direct reference to LHMP or within General Plan safety element?": "sb379_integration",
     "URL's to relevant documents": "documents",
