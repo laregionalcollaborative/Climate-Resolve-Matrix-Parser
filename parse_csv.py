@@ -1,17 +1,13 @@
 import pandas as pd
 from dataclasses import dataclass
 import re
-
-@dataclass
-class Municipality:
-    name: str
-    county: str
+import constants
 
 @dataclass
 class DocumentURL:
-    municipality: Municipality
+    '''Represents a Document with a type, year, and url link'''
     type: str
-    year: int
+    year: str
     link: str
 
 def GetPhoneFromStaffInfo(staff_info: str):
@@ -19,7 +15,7 @@ def GetPhoneFromStaffInfo(staff_info: str):
         - Returns None if no phone number available
         - Returns only the first phone number if multiple are found
     '''
-    numbers = re.compile(r'(?:\(| |-|x|\n)(\d+)')
+    numbers = re.compile(constants.REGEX_MATCHING_FNS["phone_number"])
     phone = numbers.findall(staff_info)
     if len(phone) == 0:
         return None
@@ -30,64 +26,95 @@ def GetPhoneFromStaffInfo(staff_info: str):
     else:
         return None
 
+def GetDocumentsFromURLs(urls_to_relevant_docs: str):
+    '''Generates DocumentURLs from info found in the provided string
+    
+    Args:
+        - urls_to_relevant_docs (str): text from a cell in Climate Resolve's "URL's to relevant documents" column
+
+    Returns:
+        - list of DocumentURL
+    '''
+    res = []
+    if type(urls_to_relevant_docs) is not str:
+        return res
+    match_fn = re.compile(constants.REGEX_MATCHING_FNS["document"])
+    type_year = match_fn.findall(urls_to_relevant_docs)
+
+    url_match_fn = re.compile(constants.REGEX_MATCHING_FNS["url"])
+    urls = url_match_fn.findall(urls_to_relevant_docs)
+
+    for type_year_match, url_match in zip(type_year, urls):
+        res.append(DocumentURL(str(type_year_match[0]), str(type_year_match[1]), str(url_match)))
+
+    return res
+
+def GetSpecificURL(doc_list: list, type_list: list):
+    '''Filters the provided list of DocumentURLs based on the partial type that is listed in type_list
+
+    Args:
+        - doc_list (list of DocumentURL): a list of DocumentURLs to search through
+        - type_list (list of str): a list of partial types to search with
+
+    Returns:
+        - url (str) or None
+
+    Note:
+        - If multiple documents are found, it returns the most recent one
+    '''
+    filtered_docs = []
+    for doc in doc_list:
+        if any([t in doc.type.lower() for t in type_list]):
+            # if doc.type in type_list:
+            filtered_docs.append(doc)
+    if len(filtered_docs) == 1:
+        return filtered_docs[0].link
+    if len(filtered_docs) > 1:
+        max_year = max([doc.year for doc in filtered_docs])
+        for doc in filtered_docs:
+            if doc.year == max_year:
+                return doc.link
+    else:
+        return None
+
+def CleanData(data: pd.DataFrame, column_map: dict):
+    '''Recursively applies column.str.strip() function to mapped columns in column_map
+
+    Args:
+        - data (pd.DataFrame): a pandas DataFrame including the data to finesse
+        - column_map (dict of str -> str): a map of old_column: new_column, where 
+            new_column will be the cleaned version of old_column
+
+    Returns:
+        - Nothing
+    '''
+    for old_column, new_column in column_map.items():
+        data[new_column] = data[old_column].str.strip()
+
 def main():
-    excel_file = "Matrix 1.1 - Status of Municipal Climate Preparedness.xlsx"
-    sheet_name = "1. Summary"
-    columns = [
-        "County", 
-        "Municipality", 
-        "Name, title, affiliation, contact information of key staff",
-        "Municipality has a standalone climate, sustainability, and/or resilience plan?",
-        "Plan that includes climate action (mitigation)? ",
-        "Plan that includes climate adaptation?",
-        "Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?",
-        "Updated General Plan per SB 379 & SB1035?",
-        "URL's to relevant documents",
-        "Does LHMP account for climate change?",
-        "Notes"
-        ]
-    data = pd.read_excel(excel_file, sheet_name=sheet_name, usecols=columns)
+    # Load the Climate Resolve Excel file into a pandas dataframe
+    fname = constants.CLIMATE_RESOLVE_META["excel_fname"]
+    sheet_name = constants.CLIMATE_RESOLVE_META["excel_tabname"]
+    usecols = list(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())
+    data = pd.read_excel(fname, sheet_name=sheet_name, usecols=usecols)
 
-    data["county_name"] = data["County"].str.strip()
-    data["city_name"] = data["Municipality"].str.strip()
-    data["staff_info"] = data["Name, title, affiliation, contact information of key staff"].str.strip()
+    # Clean any white spaces, etc., from the data and map to the new column names
+    CleanData(data, constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP)
+
+    # Extract additional information from the data
     data["phone"] = data["staff_info"].apply(lambda x: GetPhoneFromStaffInfo(x))
-    data["has_plan"] = data["Municipality has a standalone climate, sustainability, and/or resilience plan?"].str.strip()
-    data["cap_status"] = data["Plan that includes climate action (mitigation)? "].str.strip()
-    data["cap_link"] = None
-    data["adapt_status"] = data["Plan that includes climate adaptation?"].str.strip()
-    data["adapt_link"] = None
-    data["sust_status"] = None
-    data["sust_link"] = None
-    data["lhmp_status"] = data["Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?"].str.strip()
-    data["lhmp_link"] = None
-    data["lhmp_ack_climate"] = data["Does LHMP account for climate change?"].str.strip()
-    data["climate_adapt_ack_in_plan"] = data["Plan that includes climate adaptation?"].str.strip() # TODO
-    data["sb378_sb1035_compliant"] = data["Updated General Plan per SB 379 & SB1035?"].str.strip()
-    # for city_name, number in zip(data['city_name'], data['phone']):
-    #     if city_name == "County of Mono":
-    #         print(city_name, number)
+    data["documents"] = data["URL's to relevant documents"].apply(lambda x: GetDocumentsFromURLs(x))
 
-    columns = [
-        "city_name",
-        "county_name",
-        "phone",
-        "has_plan",
-        "cap_status",
-        "cap_link",
-        "adapt_status",
-        "adapt_link",
-        "sust_status",
-        "sust_link",
-        "lhmp_status",
-        "lhmp_link",
-        "lhmp_ack_climate",
-        "climate_adapt_ack_in_plan",
-        "sb378_sb1035_compliant",
-        # "city_url"
-    ]
+    data["cap_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["cap"]))
+    # data["sust_status"] = None # TODO
+    data["sust_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["sust"]))
+    data["lhmp_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["lhmp"]))
 
-    data.to_excel('cleaned_data.xlsx', columns=columns, index=False)
+    columns = set(data.keys())
+    columns.difference_update(set(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys()))
+    columns.difference_update(set(constants.OUTPUT_FILE_META['columns_to_exclude']))
+
+    data.to_excel(constants.OUTPUT_FILE_META["excel_fname"], columns=columns, index=False)
 
 if __name__ == "__main__":
     main()
