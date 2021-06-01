@@ -20,7 +20,7 @@ CLIMATE_RESOLVE_META = {
 # Mapping of column names from the Climate Resolve matrix to the output excel file
 CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
     "County": "county_name",
-    "Municipality": "city_name", 
+    "Municipality": "municipality_name", 
     "Name, title, affiliation, contact information of key staff": "staff_info",
     "Municipality has a standalone climate, sustainability, and/or resilience plan?": "city_has_cap_sust_lhmp",
     "Plan that includes climate action (mitigation)? ": "cap_status", # extra space is intentional
