@@ -5,6 +5,7 @@ REGEX_MATCHING_FNS = {
     "phone_number" : r"(?:\(| |-|x|\n)(\d+)"
 }
 
+# Mapping of plan type (abbreviation) to a list of possible words used to describe it
 PLAN_TYPE_MAP = {
     "cap": ["cap", "climate action plan", "caap", "climate action and adaptation plan", "climate and energy plan", "climate plan"],
     "sust": ["sustainability", "sustainable"],
