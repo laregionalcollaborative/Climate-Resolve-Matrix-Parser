@@ -5,22 +5,27 @@ A set of tools to parse the Climate Resolve Matrix, as well as other relevant da
 ## Usage
 
 - Install Python 3.8 and Git
-- Checkout this repository, cd into directory
+- Checkout this repository
 
-        C:USER> git clone git@github.com:laregionalcollaborative/Climate-Resolve-Matrix-Parser.git
-        C:USER> cd Climate-Resolve-Matrix-Parser
+        git clone git@github.com:laregionalcollaborative/Climate-Resolve-Matrix-Parser.git
 
-- Create virtual environment and activate
+- cd into directory
 
-        C:USER\Climate-Resolve-Matrix-Parser> python -m venv env
-        C:USER\Climate-Resolve-Matrix-Parser> env\Scripts\activate
-        (env) C:USER\Climate-Resolve-Matrix-Parser>
+        cd Climate-Resolve-Matrix-Parser
+
+- Create virtual environment
+
+        python -m venv env
+
+- Activate virtual environment
+
+        env\Scripts\activate
 
 - install requirements
 
-        (env) C:USER\Climate-Resolve-Matrix-Parser> pip install -r requirements.txt
+        pip install -r requirements.txt
 
 - download the relevant data sources, and update constants.py accordingly with their filenames
 - run the parsing script
 
-        (env) C:USER\Climate-Resolve-Matrix-Parser> python parse_csv.py
+        python parse_csv.py
