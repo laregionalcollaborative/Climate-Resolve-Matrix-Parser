@@ -31,15 +31,15 @@ def FixMunicipalities(name: str):
 
 def parse_climate_resolve_data(data):
     '''Extract additional information from the data'''
-    data["contact_phone"] = data["staff_info"].apply(lambda x: GetPhoneFromStaffInfo(x))
-    data["contact_email"] = data["staff_info"].apply(lambda x: GetEmailFromStaffInfo(x))
-    data["contact_first_name"], data["contact_last_name"], data["contact_title"] = zip(*data["staff_info"].apply(lambda x: GetContactNamePositionFromStaffInfo(x)))
+    data["phone"] = data["staff_info"].apply(lambda x: GetPhoneFromStaffInfo(x))
+    data["email"] = data["staff_info"].apply(lambda x: GetEmailFromStaffInfo(x))
+    data["first_name"], data["last_name"], data["title"] = zip(*data["staff_info"].apply(lambda x: GetContactNamePositionFromStaffInfo(x)))
     data["documents"] = data["URL's to relevant documents"].apply(lambda x: GetDocumentsFromURLs(x))
     data["cap_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["cap"]))
     # data["sust_status"] = None # TODO
     data["sust_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["sust"]))
     data["lhmp_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["lhmp"]))
-    data["municipality_name"] = data["municipality_name"].apply(lambda x: FixMunicipalities(x))
+    data["mun_name"] = data["mun_name"].apply(lambda x: FixMunicipalities(x))
 
 def remove_ending_city_from_word(word):
     pattern = re.compile(r"([a-zA-Z ().ñ]*?) city")
@@ -49,7 +49,33 @@ def remove_ending_city_from_word(word):
     return word
 
 def parse_fema_data(data):
-    data["municipality_name_fema"] = data["municipality_name_fema"].apply(lambda x: remove_ending_city_from_word(x))
+    data["mun_name_f"] = data["mun_name_f"].apply(lambda x: remove_ending_city_from_word(x))
+
+def combine_lhmp_status_columns(data):
+    # for fema_status, cr_status in zip(data["lhmp_status"], data["lhmp_status_cr"]):
+    pass
+
+def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in progress", default="unaccounted for"):
+    if type(x) is not str:
+        return blank
+    s = x.lower()
+    if 'in_progress' in s:
+        return in_progress
+    elif "no" in s:
+        return no
+    elif "yes" in s:
+        return yes
+    else:
+        return default
+
+def parse_combined_data(data):
+    combine_lhmp_status_columns(data)
+    data["sb379_int2"] = data["sb379_int"].apply(lambda x: winnow_value(x))
+    data["cap_status2"] = data["cap_status"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["mun_plan2"] = data["mun_plan"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["plan_adapt2"] = data["plan_adapt"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["lhmp_clim2"] = data["lhmp_clim"].apply(lambda x: winnow_value(x))
+
 
 def GetPhoneFromStaffInfo(staff_info: str):
     '''Finds the phone number from a staff_info string and returns it as a string, with the extension if available
@@ -154,8 +180,11 @@ def CleanData(data: pd.DataFrame, column_map: dict):
         - Nothing
     '''
     for old_column, new_column in column_map.items():
+        # Strip whitespace if the data type is a string
         if type(data[old_column][0]) == str:
             data[new_column] = data[old_column].str.strip()
+        else:
+            data[new_column] = data[old_column]
 
 def main():
     # Load the Climate Resolve Excel file into a pandas dataframe, clean it, and parse
@@ -174,7 +203,9 @@ def main():
     # print(sorted(municipalities_cr))
 
     # Combine the Climate Resolve and FEMA data
-    data = pd.merge(data, fema_data, how="left", left_on="municipality_name", right_on="municipality_name_fema")
+    data = pd.merge(data, fema_data, how="left", left_on="mun_name", right_on="mun_name_f")
+
+    parse_combined_data(data)
 
     columns = set(data.keys())
     columns.difference_update(set(list(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys()) + list(constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())))

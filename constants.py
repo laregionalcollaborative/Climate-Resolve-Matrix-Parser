@@ -28,30 +28,30 @@ FEMA_META = {
 
 # Mapping of column names from the Climate Resolve matrix to the output excel file
 CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
-    "County": "county_name",
-    "Municipality": "municipality_name", 
+    "County": "county",
+    "Municipality": "mun_name", 
     "Name, title, affiliation, contact information of key staff": "staff_info",
-    "Municipality has a standalone climate, sustainability, and/or resilience plan?": "city_has_cap_sust_lhmp",
+    "Municipality has a standalone climate, sustainability, and/or resilience plan?": "mun_plan",
     "Plan that includes climate action (mitigation)? ": "cap_status", # extra space is intentional
-    "Plan that includes climate adaptation?": "climate_adapt_ack_in_plan",
-    "Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?": "lhmp_status_cr",
-    "Updated General Plan per SB 379 & SB1035?": "sb379_sb1035_addressed_general_plan",
-    "SB379 integration -- by direct reference to LHMP or within General Plan safety element?": "sb379_integration",
+    "Plan that includes climate adaptation?": "plan_adapt",
+    "Municipality has a Local Hazard Mitigation Plan (LHMP) either created by City or from the County?": "lhmp_cr",
+    "Updated General Plan per SB 379 & SB1035?": "sb379_1035",
+    "SB379 integration -- by direct reference to LHMP or within General Plan safety element?": "sb379_int",
     "URL's to relevant documents": "documents",
-    "Does LHMP account for climate change?": "lhmp_ack_climate",
+    "Does LHMP account for climate change?": "lhmp_clim",
     "Notes": "notes"
 }
 
 # Mapping of column names from the FEMA data to the output excel file
 FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP = {
-    "County Name": "county_name_fema",
-    "Community Name": "municipality_name_fema", 
-    "Plan Status": "lhmp_status",
+    "County Name": "county_f",
+    "Community Name": "mun_name_f", 
+    "Plan Status": "lhmp_stat",
     "Plan Type": "lhmp_type",
-    "Plan is an Update (Flag)": "lhmp_update_flag",
-    "Plan Update Number": "lhmp_update_number",
-    "Plan Approval Date": "lhmp_approval_date",
-    "Expiration Date": "lhmp_expiration_date"
+    "Plan is an Update (Flag)": "lhmp_rev",
+    "Plan Update Number": "lhmp_rev_n",
+    "Plan Approval Date": "lhmp_appr",
+    "Expiration Date": "lhmp_expir"
 }
 
 # Mapping of Climate Resolve municipality names to corresponding FEMA names if not matched
@@ -77,6 +77,15 @@ CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
     "La Habra Heights": "La Habra",
     "Rolling HIlls": "Rolling Hills",
     "Yucca Valley": "Yucca Valley town"
+}
+
+COLUMNS_TO_APPLY_UNACCOUNTED_FOR = {
+    "cap_status",
+    "city_has_cap_sust_lhmp",
+    "climate_adapt_ack_in_plan",
+    "lhmp_ack_climate",
+    "lhmp_status",
+    "sb379_integration"
 }
 
 # Metadata about the final output file
