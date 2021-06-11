@@ -57,7 +57,7 @@ def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in
     if type(x) is not str:
         return blank
     s = x.lower()
-    if 'in_progress' in s:
+    if 'in process' in s: # Note that 'in process' was used since this shows up in the climate resolve data
         return in_progress
     elif "no" in s:
         return no
@@ -69,6 +69,7 @@ def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in
 def parse_combined_data(data):
     combine_lhmp_status_columns(data)
     data["sb379_int"] = data["sb379_int"].apply(lambda x: winnow_value(x))
+    data["sb379_1035"] = data["sb379_1035"].apply(lambda x: winnow_value(x))
     data["cap_status"] = data["cap_status"].apply(lambda x: winnow_value(x, no="unaccounted for"))
     data["mun_plan"] = data["mun_plan"].apply(lambda x: winnow_value(x, no="unaccounted for"))
     data["plan_adapt"] = data["plan_adapt"].apply(lambda x: winnow_value(x, no="unaccounted for"))
