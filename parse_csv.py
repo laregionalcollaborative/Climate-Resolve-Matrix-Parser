@@ -33,10 +33,9 @@ def parse_climate_resolve_data(data):
     '''Extract additional information from the data'''
     data["phone"] = data["staff_info"].apply(lambda x: GetPhoneFromStaffInfo(x))
     data["email"] = data["staff_info"].apply(lambda x: GetEmailFromStaffInfo(x))
-    data["first_name"], data["last_name"], data["title"] = zip(*data["staff_info"].apply(lambda x: GetContactNamePositionFromStaffInfo(x)))
+    data["first_name"], data["last_name"], data["position"] = zip(*data["staff_info"].apply(lambda x: GetContactNamePositionFromStaffInfo(x)))
     data["documents"] = data["URL's to relevant documents"].apply(lambda x: GetDocumentsFromURLs(x))
     data["cap_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["cap"]))
-    # data["sust_status"] = None # TODO
     data["sust_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["sust"]))
     data["lhmp_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["lhmp"]))
     data["mun_name"] = data["mun_name"].apply(lambda x: FixMunicipalities(x))
@@ -52,8 +51,7 @@ def parse_fema_data(data):
     data["mun_name_f"] = data["mun_name_f"].apply(lambda x: remove_ending_city_from_word(x))
 
 def combine_lhmp_status_columns(data):
-    # for fema_status, cr_status in zip(data["lhmp_status"], data["lhmp_status_cr"]):
-    pass
+    data["lhmp_status_merged"] = data["lhmp_stat"].where(data["lhmp_stat"].notnull(), data["lhmp_cr"])
 
 def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in progress", default="unaccounted for"):
     if type(x) is not str:
@@ -70,11 +68,11 @@ def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in
 
 def parse_combined_data(data):
     combine_lhmp_status_columns(data)
-    data["sb379_int2"] = data["sb379_int"].apply(lambda x: winnow_value(x))
-    data["cap_status2"] = data["cap_status"].apply(lambda x: winnow_value(x, no="unaccounted for"))
-    data["mun_plan2"] = data["mun_plan"].apply(lambda x: winnow_value(x, no="unaccounted for"))
-    data["plan_adapt2"] = data["plan_adapt"].apply(lambda x: winnow_value(x, no="unaccounted for"))
-    data["lhmp_clim2"] = data["lhmp_clim"].apply(lambda x: winnow_value(x))
+    data["sb379_int"] = data["sb379_int"].apply(lambda x: winnow_value(x))
+    data["cap_status"] = data["cap_status"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["mun_plan"] = data["mun_plan"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["plan_adapt"] = data["plan_adapt"].apply(lambda x: winnow_value(x, no="unaccounted for"))
+    data["lhmp_clim"] = data["lhmp_clim"].apply(lambda x: winnow_value(x))
 
 
 def GetPhoneFromStaffInfo(staff_info: str):
