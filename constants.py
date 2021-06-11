@@ -4,7 +4,7 @@ REGEX_MATCHING_FNS = {
     "document" : r"(.*) \((\d+|N\/A)\)",
     "phone_number" : r"(?:\(| |-|x|\n)(\d+)",
     "email" : r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)",
-    "contact_name_position" : r"([a-zA-Z]+) ([a-zA-Z]+), ([a-zA-Z ]*?)(?:\n| *\n)"
+    "contact_name_position" : r"([a-zA-Z.]+) ([a-zA-Z]+), ([a-zA-Z &]*?)(?:\n| *\n)"
 }
 
 # Mapping of plan type (abbreviation) to a list of possible words used to describe it
@@ -44,7 +44,7 @@ CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
 
 # Mapping of column names from the FEMA data to the output excel file
 FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP = {
-    "County Name": "county_f",
+    "County Name": "countyfema",
     "Community Name": "mun_name_f", 
     "Plan Status": "lhmp_stat",
     "Plan Type": "lhmp_type",
