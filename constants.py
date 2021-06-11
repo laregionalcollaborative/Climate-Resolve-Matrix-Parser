@@ -46,7 +46,7 @@ CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
 FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP = {
     "County Name": "countyfema",
     "Community Name": "mun_name_f", 
-    "Plan Status": "lhmp_stat",
+    "Plan Status": "lhmp_fema",
     "Plan Type": "lhmp_type",
     "Plan is an Update (Flag)": "lhmp_rev",
     "Plan Update Number": "lhmp_rev_n",

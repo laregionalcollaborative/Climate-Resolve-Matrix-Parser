@@ -51,7 +51,7 @@ def parse_fema_data(data):
     data["mun_name_f"] = data["mun_name_f"].apply(lambda x: remove_ending_city_from_word(x))
 
 def combine_lhmp_status_columns(data):
-    data["lhmp_status_merged"] = data["lhmp_stat"].where(data["lhmp_stat"].notnull(), data["lhmp_cr"])
+    data["lhmp_stat"] = data["lhmp_fema"].where(data["lhmp_fema"].notnull(), data["lhmp_cr"]) # Use FEMA data where available, otherwise default to climate resolve data
 
 def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in progress", default="unaccounted for"):
     if type(x) is not str:
