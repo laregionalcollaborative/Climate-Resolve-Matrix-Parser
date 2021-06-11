@@ -76,7 +76,8 @@ CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
     "La Canada Flintridge": "La Cañada Flintridge",
     "La Habra Heights": "La Habra",
     "Rolling HIlls": "Rolling Hills",
-    "Yucca Valley": "Yucca Valley town"
+    "Yucca Valley": "Yucca Valley town",
+    "Ventura": "San Buenaventura (Ventura)"
 }
 
 COLUMNS_TO_APPLY_UNACCOUNTED_FOR = {
