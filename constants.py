@@ -56,20 +56,11 @@ FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP = {
 
 # Mapping of Climate Resolve municipality names to corresponding FEMA names if not matched
 CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
-    # "County of Fresno": ,
     "County of Imperial": "Imperial County",
-    # "County of Inyo": ,
-    # "County of Kern": ,
-    # "County of Kings": ,
     "County of Los Angeles": "Los Angeles County",
-    # "County of Madera": ,
-    # "County of Mono": ,
     "County of Orange": "Orange County",
     "County of Riverside": "Riverside County",
     "County of San Bernardino": "San Bernardino County",
-    # "County of Santa Barbara": ,
-    # "County of Tulare": ,
-    # "County of Tuolumne": ,
     "County of Ventura": "Ventura County",
     "Filmore": "Fillmore",
     "Jurupa Valley": "Jurupa Valley City",
@@ -80,13 +71,10 @@ CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
     "Ventura": "San Buenaventura (Ventura)"
 }
 
-COLUMNS_TO_APPLY_UNACCOUNTED_FOR = {
-    "cap_status",
-    "city_has_cap_sust_lhmp",
-    "climate_adapt_ack_in_plan",
-    "lhmp_ack_climate",
-    "lhmp_status",
-    "sb379_integration"
+WINNOW_DEFAULT_DICT = {
+    "no": ["no"],
+    "yes": ["yes"],
+    "in progress": ["in process"],
 }
 
 # Metadata about the final output file
@@ -95,6 +83,11 @@ OUTPUT_FILE_META = {
     "columns_to_exclude": [
         'documents',
         'staff_info',
-        'notes'
+        'notes',
+        'mun_name_f',
+        'countyfema',
+        'lhmp_fema',
+        'lhmp_cr',
+        'sb379_1035'
     ]
 }
