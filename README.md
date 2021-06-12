@@ -29,3 +29,8 @@ A set of tools to parse the Climate Resolve Matrix, as well as other relevant da
 - run the parsing script
 
         python parse_csv.py
+
+## Release Notes
+
+### Version 1.0, 6/11/2021
+ - Initial release of parser
