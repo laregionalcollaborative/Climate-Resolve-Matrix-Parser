@@ -41,6 +41,7 @@ def parse_climate_resolve_data(data):
     data["mun_name"] = data["mun_name"].apply(lambda x: FixMunicipalities(x))
 
 def remove_ending_city_from_word(word):
+    '''Removes 'city' from the end of a word, if it exists, and returns the result'''
     pattern = re.compile(r"([a-zA-Z ().ñ]*?) city")
     res = pattern.findall(word)
     if len(res) == 1:
@@ -48,32 +49,42 @@ def remove_ending_city_from_word(word):
     return word
 
 def parse_fema_data(data):
+    '''Extract additional information from the data'''
     data["mun_name_f"] = data["mun_name_f"].apply(lambda x: remove_ending_city_from_word(x))
 
 def combine_lhmp_status_columns(data):
+    '''Combine information from the FEMA and Climate Resolve data into the lhmp_stat final column'''
     data["lhmp_stat"] = data["lhmp_fema"].where(data["lhmp_fema"].notnull(), data["lhmp_cr"]) # Use FEMA data where available, otherwise default to climate resolve data
+    winnow_dict = {
+        "unaccounted for": ["no"],
+        "in progress": ["in process", "awaiting revisions", "approvable pending adoption"],
+        "approved": ["yes", "approved"]
+    }
+    data["lhmp_stat"] = data["lhmp_stat"].apply(lambda x: winnow_value(x, **winnow_dict))
 
-def winnow_value(x, blank="unaccounted for", yes="yes", no="no", in_progress="in progress", default="unaccounted for"):
+def winnow_value(x, blank="unaccounted for", default="unaccounted for", **kwargs):
+    '''Checks the provided string based on the kwargs values, and returns the associated key if found.'''
     if type(x) is not str:
         return blank
-    s = x.lower()
-    if 'in process' in s: # Note that 'in process' was used since this shows up in the climate resolve data
-        return in_progress
-    elif "no" in s:
-        return no
-    elif "yes" in s:
-        return yes
-    else:
-        return default
+    x = x.lower()
+    if len(kwargs) == 0:
+        kwargs = constants.WINNOW_DEFAULT_DICT # use the default dictionary if none is provided
+    for key, values in kwargs.items():
+        if any([value in x for value in values]):
+            return key
+    return default
 
 def parse_combined_data(data):
+    '''Extract additional information from the data'''
     combine_lhmp_status_columns(data)
     data["sb379_int"] = data["sb379_int"].apply(lambda x: winnow_value(x))
     data["sb379_1035"] = data["sb379_1035"].apply(lambda x: winnow_value(x))
-    data["cap_status"] = data["cap_status"].apply(lambda x: winnow_value(x, no="unaccounted for"))
-    data["mun_plan"] = data["mun_plan"].apply(lambda x: winnow_value(x, no="unaccounted for"))
-    data["plan_adapt"] = data["plan_adapt"].apply(lambda x: winnow_value(x, no="unaccounted for"))
     data["lhmp_clim"] = data["lhmp_clim"].apply(lambda x: winnow_value(x))
+
+    winnow_dict = {"unaccounted for": ["no"], "yes": ["yes"], "in progress": ["in process"]} # return 'unaccounted for' where it says no
+    data["cap_status"] = data["cap_status"].apply(lambda x: winnow_value(x, **winnow_dict))
+    data["mun_plan"] = data["mun_plan"].apply(lambda x: winnow_value(x, **winnow_dict))
+    data["plan_adapt"] = data["plan_adapt"].apply(lambda x: winnow_value(x, **winnow_dict))
 
 
 def GetPhoneFromStaffInfo(staff_info: str):
@@ -191,25 +202,21 @@ def main():
     CleanData(data, constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP)
     parse_climate_resolve_data(data)
 
+    # Load the FEMA Excel file into a pandas dataframe, clean it, and parse
     fema_data = load_fema_data()
     CleanData(fema_data, constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP)
     parse_fema_data(fema_data)
 
-    # municipalities_fema = set(list(fema_data['municipality_name_fema']))
-    # municipalities_cr = set(list(data['municipality_name']))
-
-    # municipalities_cr.difference_update(municipalities_fema)
-    # print(sorted(municipalities_cr))
-
     # Combine the Climate Resolve and FEMA data
     data = pd.merge(data, fema_data, how="left", left_on="mun_name", right_on="mun_name_f")
-
     parse_combined_data(data)
 
+    # Update the columns that won't be included in the output file
     columns = set(data.keys())
     columns.difference_update(set(list(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys()) + list(constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())))
     columns.difference_update(set(constants.OUTPUT_FILE_META['columns_to_exclude']))
 
+    columns = sorted(columns) # Sort the columns alphabetically from left to right
     data.to_excel(constants.OUTPUT_FILE_META["excel_fname"], columns=columns, index=False)
 
 if __name__ == "__main__":
