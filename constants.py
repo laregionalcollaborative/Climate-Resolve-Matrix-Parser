@@ -112,7 +112,7 @@ OUTPUT_FILE_META = {
         'lhmp_fema',
         'lhmp_cr',
         'sb379_1035',
-        'mun_scag',
+        'mun_scag_temp',
         'countyscag'
     ]
 }
