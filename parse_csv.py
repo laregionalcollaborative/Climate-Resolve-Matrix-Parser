@@ -2,6 +2,7 @@ import pandas as pd
 from dataclasses import dataclass
 import re
 import constants
+import numpy as np
 
 @dataclass
 class DocumentURL:
@@ -24,7 +25,31 @@ def load_fema_data():
     usecols = list(constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())
     return pd.read_excel(fname, sheet_name=sheet_name, usecols=usecols)
 
+def load_scag_data():
+    '''Loads the scag map data and returns it as a pandas dataframe'''
+    fname = constants.SCAG_MAP_META["excel_fname"]
+    sheet_name = constants.SCAG_MAP_META["excel_tabname"]
+    usecols = list(constants.SCAG_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())
+    return pd.read_excel(fname, sheet_name=sheet_name, usecols=usecols)
+
+def parse_scag_data(data):
+    '''Extract additional information from the data'''
+    data["mun_scag_temp"] = data.apply(lambda row: FixSCAGMunicipalities(row["mun_scag"], row["countyscag"]), axis=1)
+
+def FixSCAGMunicipalities(mun_scag, countyscag):
+    '''Fixes some county names that don't map 1:1, and also the case in which Unincorporated is provided, in which
+    it needs to add "County" to the end of the county name, which maps nicely later on'''
+    if mun_scag in constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING.keys():
+        print(f"Changing {mun_scag} to {constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING[mun_scag]}")
+        return constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING[mun_scag]
+    elif mun_scag == "Unincorporated":
+        print(f"Changing {mun_scag} to {countyscag} County")
+        return countyscag + " County"
+    else:
+        return mun_scag
+
 def FixMunicipalities(name: str):
+    '''Applies a dictionary mapping for municipality names that don't match exactly'''
     if name in constants.CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING.keys():
         return constants.CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING[name]
     return name
@@ -34,6 +59,7 @@ def parse_climate_resolve_data(data):
     data["phone"] = data["staff_info"].apply(lambda x: GetPhoneFromStaffInfo(x))
     data["email"] = data["staff_info"].apply(lambda x: GetEmailFromStaffInfo(x))
     data["first_name"], data["last_name"], data["position"] = zip(*data["staff_info"].apply(lambda x: GetContactNamePositionFromStaffInfo(x)))
+    data["name"] = data["first_name"] + " " + data["last_name"]
     data["documents"] = data["URL's to relevant documents"].apply(lambda x: GetDocumentsFromURLs(x))
     data["cap_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["cap"]))
     data["sust_link"] = data["documents"].apply(lambda x: GetSpecificURL(x, constants.PLAN_TYPE_MAP["sust"]))
@@ -207,13 +233,22 @@ def main():
     CleanData(fema_data, constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP)
     parse_fema_data(fema_data)
 
+    # Load the SCAG Excel file into a pandas dataframe, clean it, and parse
+    scag_data = load_scag_data()
+    CleanData(scag_data, constants.SCAG_COLUMN_TO_OUTPUT_COLUMN_MAP)
+    parse_scag_data(scag_data)
+
     # Combine the Climate Resolve and FEMA data
     data = pd.merge(data, fema_data, how="left", left_on="mun_name", right_on="mun_name_f")
     parse_combined_data(data)
 
+    # Combine the SCAG data with the rest of the data
+    data = pd.merge(data, scag_data, how="left", left_on="mun_name", right_on="mun_scag_temp")
+    data["mun_index"] = data["mun_index"].fillna(0).astype("Int64") # pad the blanks with 0 so that we can make the column an integer type for QGIS to be happy
+
     # Update the columns that won't be included in the output file
     columns = set(data.keys())
-    columns.difference_update(set(list(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys()) + list(constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())))
+    columns.difference_update(set(list(constants.CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP.keys()) + list(constants.FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())+ list(constants.SCAG_COLUMN_TO_OUTPUT_COLUMN_MAP.keys())))
     columns.difference_update(set(constants.OUTPUT_FILE_META['columns_to_exclude']))
 
     columns = sorted(columns) # Sort the columns alphabetically from left to right

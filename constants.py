@@ -28,6 +28,12 @@ FEMA_META = {
     "excel_tabname": "Sheet1"
 }
 
+# Dictionary of useful metadata about the SCAG Map Data spreadsheet
+SCAG_MAP_META = {
+    "excel_fname": "SCAG-Region-ObjectID-codes.xlsx",
+    "excel_tabname": "Sheet1"
+}
+
 # Mapping of column names from the Climate Resolve matrix to the output excel file
 CLIMATE_RESOLVE_COLUMN_TO_OUTPUT_COLUMN_MAP = {
     "County": "county",
@@ -56,6 +62,22 @@ FEMA_COLUMN_TO_OUTPUT_COLUMN_MAP = {
     "Expiration Date": "lhmp_expir"
 }
 
+# Mapping of column names from the SCAG data to the output excel file
+SCAG_COLUMN_TO_OUTPUT_COLUMN_MAP = {
+    "CITY": "mun_scag",
+    "OBJECTID": "mun_index",
+    "COUNTY": "countyscag"
+}
+
+# Mapping of SCAG municipality names to corresponding data names if not matched
+SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING = {
+    "Yucca Valley": "Yucca Valley town",
+    "San Buenaventura": "San Buenaventura (Ventura)",
+    "Imperial": "City of Imperial",
+    "La Canada Flintridge": "La Cañada Flintridge",
+    "Jurupa Valley": "Jurupa Valley City"
+}
+
 # Mapping of Climate Resolve municipality names to corresponding FEMA names if not matched
 CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
     "County of Imperial": "Imperial County",
@@ -67,7 +89,6 @@ CLIMATE_RESOLVE_TO_FEMA_MUNICIPALITY_MAPPING = {
     "Filmore": "Fillmore",
     "Jurupa Valley": "Jurupa Valley City",
     "La Canada Flintridge": "La Cañada Flintridge",
-    "La Habra Heights": "La Habra",
     "Rolling HIlls": "Rolling Hills",
     "Yucca Valley": "Yucca Valley town",
     "Ventura": "San Buenaventura (Ventura)"
@@ -90,6 +111,8 @@ OUTPUT_FILE_META = {
         'countyfema',
         'lhmp_fema',
         'lhmp_cr',
-        'sb379_1035'
+        'sb379_1035',
+        'mun_scag',
+        'countyscag'
     ]
 }
