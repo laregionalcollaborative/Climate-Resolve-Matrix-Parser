@@ -40,10 +40,8 @@ def FixSCAGMunicipalities(mun_scag, countyscag):
     '''Fixes some county names that don't map 1:1, and also the case in which Unincorporated is provided, in which
     it needs to add "County" to the end of the county name, which maps nicely later on'''
     if mun_scag in constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING.keys():
-        print(f"Changing {mun_scag} to {constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING[mun_scag]}")
         return constants.SCAG_TO_OUTPUT_MUNICIPALITY_MAPPING[mun_scag]
     elif mun_scag == "Unincorporated":
-        print(f"Changing {mun_scag} to {countyscag} County")
         return countyscag + " County"
     else:
         return mun_scag
