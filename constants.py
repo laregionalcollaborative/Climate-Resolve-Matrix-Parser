@@ -11,7 +11,7 @@ REGEX_MATCHING_FNS = {
 
 # Mapping of plan type (abbreviation) to a list of possible words used to describe it
 PLAN_TYPE_MAP = {
-    "cap": ["cap", "climate action plan", "caap", "climate action and adaptation plan", "climate and energy plan", "climate plan"],
+    "cap": ["cap", "climate action plan", "caap", "climate action and adaptation plan", "climate and energy plan", "climate plan", "action plan for climate resilience"],
     "sust": ["sustainability", "sustainable"],
     "lhmp": ["lhmp", "mjhmp", "hmp", "hazard"]
 }
