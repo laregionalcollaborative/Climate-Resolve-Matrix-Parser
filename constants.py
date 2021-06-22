@@ -1,4 +1,4 @@
-VERSION: '1.2'
+VERSION: "1.2.1"
 
 # Dictionary of useful regex strings for finding specific excerpts from longer phrases
 REGEX_MATCHING_FNS = {
