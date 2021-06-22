@@ -32,6 +32,9 @@ A set of tools to parse the Climate Resolve Matrix, as well as other relevant da
 
 ## Release Notes
 
+### Version 1.2, 6/21/2021
+ - Added "action plan for climate resilience" as a search string to map to CAP plan type
+
 ### Version 1.1, 6/14/2021
  - Added 'name' output column, which combines first and last name into a single column
  - Added ability to import SCAG data and join into remaining data in order to include 'mun_index', which is used by QGIS to combine the output data with existing map files
